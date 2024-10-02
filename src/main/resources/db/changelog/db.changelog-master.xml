@@ -1,0 +1,29 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="1" author="Vasiliy">
+        <createTable tableName="owner">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="dob" type="DATE"/>
+            <column name="gender" type="VARCHAR(10)"/>
+            <column name="license_categories" type="VARCHAR(255)"/>
+        </createTable>
+
+        <createTable tableName="car">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="make" type="VARCHAR(255)"/>
+            <column name="model" type="VARCHAR(255)"/>
+            <column name="number_plate" type="VARCHAR(20)"/>
+            <column name="owner_id" type="BIGINT">
+                <constraints foreignKeyName="fk_owner" references="owner(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
