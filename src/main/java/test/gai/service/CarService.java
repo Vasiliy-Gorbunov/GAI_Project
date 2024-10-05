@@ -24,23 +24,22 @@ public class CarService {
         this.ownerRepository = ownerRepository;
     }
 
-    // Получение списка всех автомобилей
+
     @Transactional(readOnly = true)
     public List<Car> getAllCars() {
         return carRepository.findAll();
     }
 
-    // Получение автомобиля по ID
+
     @Transactional(readOnly = true)
     public Car getCarById(Long id) {
         return carRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Car with id " + id + " not found"));
     }
 
-    // Создание нового автомобиля
+
     @Transactional
     public Car createCar(Car car) {
-        // Проверяем, существует ли владелец
         if (car.getOwner() != null) {
             Optional<Owner> owner = ownerRepository.findById(car.getOwner().getId());
             if (owner.isEmpty()) {
@@ -51,7 +50,7 @@ public class CarService {
         return carRepository.save(car);
     }
 
-    // Обновление автомобиля
+
     @Transactional
     public Car updateCar(Long id, Car updatedCar) {
         Car existingCar = carRepository.findById(id)
@@ -63,7 +62,7 @@ public class CarService {
 
         if (updatedCar.getOwner() != null) {
             Optional<Owner> owner = ownerRepository.findById(updatedCar.getOwner().getId());
-            if (!owner.isPresent()) {
+            if (owner.isEmpty()) {
                 throw new ResourceNotFoundException("Owner with id " + updatedCar.getOwner().getId() + " not found");
             }
             existingCar.setOwner(owner.get());
@@ -72,15 +71,15 @@ public class CarService {
         return carRepository.save(existingCar);
     }
 
-    // Удаление автомобиля
+
     @Transactional
     public void deleteCar(Long id) {
         Car existingCar = carRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Car with id " + id + " not found"));
-        carRepository.delete(existingCar);
+        carRepository.deleteById(existingCar.getId());
     }
 
-    // Получение всех автомобилей по ID владельца
+
     @Transactional(readOnly = true)
     public List<Car> getCarsByOwnerId(Long ownerId) {
         Owner owner = ownerRepository.findById(ownerId)
