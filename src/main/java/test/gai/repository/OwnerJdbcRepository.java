@@ -3,7 +3,7 @@ package test.gai.repository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import test.gai.mapper.OwnerRowMapper;
-import test.gai.model.Owner;
+import test.gai.entity.Owner;
 
 import java.util.List;
 import java.util.Optional;

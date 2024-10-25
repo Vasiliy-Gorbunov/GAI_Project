@@ -1,6 +1,6 @@
 package test.gai.repository;
 
-import test.gai.model.Owner;
+import test.gai.entity.Owner;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,8 +1,8 @@
 package test.gai.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
-import test.gai.model.Gender;
-import test.gai.model.Owner;
+import test.gai.entity.Gender;
+import test.gai.entity.Owner;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

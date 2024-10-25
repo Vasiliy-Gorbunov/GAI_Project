@@ -1,64 +1,78 @@
 package test.gai.service;
 
 import org.springframework.stereotype.Service;
+import test.gai.DTO.OwnerDto;
 import test.gai.exception.ResourceNotFoundException;
-import test.gai.model.Owner;
-import test.gai.repository.OwnerJpaRepository;
+import test.gai.entity.Owner;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import test.gai.mapper.MappingUtils;
+import test.gai.model.OwnerModel;
+import test.gai.repository.OwnerRepository;
 
 @Service
 public class OwnerService {
 
-    private final OwnerJpaRepository ownerRepository;
+    private final OwnerRepository ownerRepository;
+    private final MappingUtils mappingUtils;
 
     @Autowired
-    public OwnerService(OwnerJpaRepository ownerRepository) {
+    public OwnerService(OwnerRepository ownerRepository, MappingUtils mappingUtils) {
         this.ownerRepository = ownerRepository;
+        this.mappingUtils = mappingUtils;
     }
 
 
     @Transactional(readOnly = true)
-    public List<Owner> getAllOwners() {
-        return ownerRepository.findAll();
+    public List<OwnerModel> getAllOwners() {
+        return ownerRepository.findAll().stream()
+                .map(mappingUtils::mapToOwnerModelFromEntity)
+                .collect(Collectors.toList());
     }
 
 
     @Transactional(readOnly = true)
-    public Owner getOwnerById(Long id) {
-        return ownerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Owner with id " + id + " not found"));
+    public OwnerModel getOwnerById(Long id) {
+        return mappingUtils.mapToOwnerModelFromEntity(ownerRepository.findById(id)
+                .orElseThrow(() -> ThrowableMessage("Owner", id)));
     }
 
 
     @Transactional
-    public Owner createOwner(Owner owner) {
-        return ownerRepository.save(owner);
+    public OwnerModel createOwner(OwnerModel ownerModel) {
+        Owner owner = mappingUtils.mapToOwner(ownerModel);
+        return mappingUtils.mapToOwnerModelFromEntity(ownerRepository.save(owner));
     }
 
 
     @Transactional
-    public Owner updateOwner(Long id, Owner updatedOwner) {
+    public OwnerModel updateOwner(Long id, OwnerModel updatedOwner) {
         Owner existingOwner = ownerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Owner with id " + id + " not found"));
+                .orElseThrow(() -> ThrowableMessage("Owner", id));
 
+        mappingUtils.mapToOwner(updatedOwner);
         existingOwner.setName(updatedOwner.getName());
         existingOwner.setDob(updatedOwner.getDob());
         existingOwner.setGender(updatedOwner.getGender());
         existingOwner.setLicenseCategories(updatedOwner.getLicenseCategories());
 
-        return ownerRepository.save(existingOwner);
+        return mappingUtils.mapToOwnerModelFromEntity(ownerRepository.save(existingOwner));
     }
 
 
     @Transactional
     public void deleteOwner(Long id) {
         Owner existingOwner = ownerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Owner with id " + id + " not found"));
+                .orElseThrow(() -> ThrowableMessage("Car", id));
         ownerRepository.deleteById(existingOwner.getId());
+    }
+
+    private ResourceNotFoundException ThrowableMessage(String obj, Long id) {
+        return new ResourceNotFoundException(obj + " with id " + id + " not found");
     }
 }
 

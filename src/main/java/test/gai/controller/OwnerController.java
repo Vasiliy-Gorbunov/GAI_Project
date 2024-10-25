@@ -1,40 +1,54 @@
 package test.gai.controller;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import test.gai.model.Owner;
+import test.gai.DTO.OwnerDto;
+import test.gai.mapper.MappingUtils;
+import test.gai.model.OwnerModel;
 import test.gai.service.OwnerService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/owners")
 public class OwnerController {
 
-    @Autowired
-    private OwnerService ownerService;
+
+    private final OwnerService ownerService;
+
+    private final MappingUtils mappingUtils;
+
+    public OwnerController(OwnerService ownerService, MappingUtils mappingUtils) {
+        this.ownerService = ownerService;
+        this.mappingUtils = mappingUtils;
+    }
+
 
     @GetMapping
-    public List<Owner> getAllOwners() {
-        return ownerService.getAllOwners();
+    public List<OwnerDto> getAllOwners() {
+        return ownerService.getAllOwners().stream()
+                .map(mappingUtils::mapToOwnerDto)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public Owner getOwnerById(@PathVariable Long id) {
-        return ownerService.getOwnerById(id);
+    public OwnerDto getOwnerById(@PathVariable Long id) {
+        return mappingUtils.mapToOwnerDto(ownerService.getOwnerById(id));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Owner createOwner(@Valid @RequestBody Owner owner) {
-        return ownerService.createOwner(owner);
+    public OwnerDto createOwner(@Valid @RequestBody OwnerDto ownerDto) {
+        OwnerModel ownerModel = mappingUtils.mapToOwnerModelFromDto(ownerDto);
+        return mappingUtils.mapToOwnerDto(ownerService.createOwner(ownerModel));
     }
 
     @PutMapping("/{id}")
-    public Owner updateOwner(@PathVariable Long id, @Valid @RequestBody Owner owner) {
-        return ownerService.updateOwner(id, owner);
+    public OwnerDto updateOwner(@PathVariable Long id, @Valid @RequestBody OwnerDto ownerDto) {
+        OwnerModel ownerModel = mappingUtils.mapToOwnerModelFromDto(ownerDto);
+        return mappingUtils.mapToOwnerDto(ownerService.updateOwner(id, ownerModel));
     }
 
     @DeleteMapping("/{id}")

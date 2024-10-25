@@ -2,8 +2,8 @@ package test.gai.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import test.gai.model.Car;
-import test.gai.model.Owner;
+import test.gai.entity.Car;
+import test.gai.entity.Owner;
 
 import java.util.List;
 import java.util.Optional;

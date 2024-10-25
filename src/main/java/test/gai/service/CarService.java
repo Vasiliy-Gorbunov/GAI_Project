@@ -4,86 +4,100 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import test.gai.exception.ResourceNotFoundException;
-import test.gai.model.Car;
-import test.gai.model.Owner;
+import test.gai.entity.Car;
+import test.gai.entity.Owner;
+import test.gai.mapper.MappingUtils;
+import test.gai.model.CarModel;
 import test.gai.repository.CarRepository;
 import test.gai.repository.OwnerRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CarService {
 
     private final CarRepository carRepository;
     private final OwnerRepository ownerRepository;
+    private final MappingUtils mappingUtils;
 
     @Autowired
-    public CarService(CarRepository carRepository, OwnerRepository ownerRepository) {
+    public CarService(CarRepository carRepository, OwnerRepository ownerRepository, MappingUtils mappingUtils) {
         this.carRepository = carRepository;
         this.ownerRepository = ownerRepository;
+        this.mappingUtils = mappingUtils;
     }
 
 
     @Transactional(readOnly = true)
-    public List<Car> getAllCars() {
-        return carRepository.findAll();
+    public List<CarModel> getAllCars() {
+        return carRepository.findAll().stream().map(mappingUtils::mapToCarModelFromEntity).collect(Collectors.toList());
     }
 
 
     @Transactional(readOnly = true)
-    public Car getCarById(Long id) {
-        return carRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Car with id " + id + " not found"));
+    public CarModel getCarById(Long id) {
+        return mappingUtils.mapToCarModelFromEntity(carRepository.findById(id)
+                .orElseThrow(() -> ThrowableMessage("Car", id)));
     }
 
 
     @Transactional
-    public Car createCar(Car car) {
+    public CarModel createCar(CarModel carModel) {
+        Car car = mappingUtils.mapToCar(carModel);
         if (car.getOwner() != null) {
             Optional<Owner> owner = ownerRepository.findById(car.getOwner().getId());
             if (owner.isEmpty()) {
-                throw new ResourceNotFoundException("Owner with id " + car.getOwner().getId() + " not found");
+                throw ThrowableMessage("Car", car.getOwner().getId());
             }
             car.setOwner(owner.get());
         }
-        return carRepository.save(car);
+        return mappingUtils.mapToCarModelFromEntity(carRepository.save(car));
     }
 
 
     @Transactional
-    public Car updateCar(Long id, Car updatedCar) {
+    public CarModel updateCar(Long id, CarModel updatedCar) {
         Car existingCar = carRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Car with id " + id + " not found"));
+                .orElseThrow(() -> ThrowableMessage("Car", id));
 
-        existingCar.setMake(updatedCar.getMake());
-        existingCar.setModel(updatedCar.getModel());
-        existingCar.setNumberPlate(updatedCar.getNumberPlate());
+        Car updatingCar = mappingUtils.mapToCar(updatedCar);
 
-        if (updatedCar.getOwner() != null) {
-            Optional<Owner> owner = ownerRepository.findById(updatedCar.getOwner().getId());
+        existingCar.setMake(updatingCar.getMake());
+        existingCar.setModel(updatingCar.getModel());
+        existingCar.setNumberPlate(updatingCar.getNumberPlate());
+
+        if (updatingCar.getOwner() != null) {
+            Optional<Owner> owner = ownerRepository.findById(updatingCar.getOwner().getId());
             if (owner.isEmpty()) {
-                throw new ResourceNotFoundException("Owner with id " + updatedCar.getOwner().getId() + " not found");
+                throw ThrowableMessage("Owner", updatingCar.getOwner().getId());
             }
             existingCar.setOwner(owner.get());
         }
 
-        return carRepository.save(existingCar);
+        return mappingUtils.mapToCarModelFromEntity(carRepository.save(existingCar));
     }
 
 
     @Transactional
     public void deleteCar(Long id) {
         Car existingCar = carRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Car with id " + id + " not found"));
+                .orElseThrow(() -> ThrowableMessage("Car", id));
         carRepository.deleteById(existingCar.getId());
     }
 
 
     @Transactional(readOnly = true)
-    public List<Car> getCarsByOwnerId(Long ownerId) {
+    public List<CarModel> getCarsByOwnerId(Long ownerId) {
         Owner owner = ownerRepository.findById(ownerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Owner with id " + ownerId + " not found"));
-        return carRepository.findByOwner(owner);
+                .orElseThrow(() -> ThrowableMessage("Owner", ownerId));
+        return carRepository.findByOwner(owner).stream()
+                .map(mappingUtils::mapToCarModelFromEntity)
+                .collect(Collectors.toList());
+    }
+
+    private ResourceNotFoundException ThrowableMessage(String obj, Long id) {
+        return new ResourceNotFoundException(obj + " with id " + id + " not found");
     }
 }

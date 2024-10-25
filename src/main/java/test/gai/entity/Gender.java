@@ -1,4 +1,4 @@
-package test.gai.model;
+package test.gai.entity;
 
 public enum Gender {
     MALE,

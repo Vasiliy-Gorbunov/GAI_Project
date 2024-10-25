@@ -1,7 +1,7 @@
 package test.gai.repository;
 
-import test.gai.model.Car;
-import test.gai.model.Owner;
+import test.gai.entity.Car;
+import test.gai.entity.Owner;
 
 import java.util.List;
 import java.util.Optional;

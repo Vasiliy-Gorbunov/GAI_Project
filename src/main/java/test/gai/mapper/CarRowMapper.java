@@ -1,8 +1,8 @@
 package test.gai.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
-import test.gai.model.Car;
-import test.gai.model.Owner;
+import test.gai.entity.Car;
+import test.gai.entity.Owner;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

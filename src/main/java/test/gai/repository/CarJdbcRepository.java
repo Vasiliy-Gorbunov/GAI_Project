@@ -1,12 +1,12 @@
 package test.gai.repository;
 
-import test.gai.model.Owner;
+import test.gai.entity.Owner;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import test.gai.mapper.CarRowMapper;
-import test.gai.model.Car;
+import test.gai.entity.Car;
 
 import java.util.List;
 import java.util.Optional;
