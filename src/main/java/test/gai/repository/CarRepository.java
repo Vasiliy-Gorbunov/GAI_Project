@@ -16,5 +16,5 @@ public interface CarRepository {
 
     void deleteById(Long id);
 
-    List<Car> findByOwner(Owner owner);
+    List<Car> findByOwnerId(Long id);
 }

@@ -41,14 +41,14 @@ public class CarJdbcRepository implements CarRepository {
                     car.getMake(),
                     car.getModel(),
                     car.getNumberPlate(),
-                    car.getOwner().getId());
+                    car.getOwner() != null ? car.getOwner().getId() : null);
         } else {
             String sql = "UPDATE car SET make = ?, model = ?, number_plate = ?, owner_id = ? WHERE id = ?";
             jdbcTemplate.update(sql,
                     car.getMake(),
                     car.getModel(),
                     car.getNumberPlate(),
-                    car.getOwner().getId(),
+                    car.getOwner() != null ? car.getOwner().getId() : null,
                     car.getId());
         }
         return car;
@@ -62,8 +62,10 @@ public class CarJdbcRepository implements CarRepository {
 
     // Получение автомобилей по ID владельца
     @Transactional(readOnly = true)
-    public List<Car> findByOwner(Owner owner) {
+    public List<Car> findByOwnerId(Long id) {
         String sql = "SELECT * FROM car WHERE owner_id = ?";
-        return jdbcTemplate.query(sql, new Object[]{owner.getId()}, new CarRowMapper());
+        List <Car> cars = jdbcTemplate.query(sql, new Object[]{id}, new CarRowMapper());
+//        cars.forEach(car -> car.setOwner(null));
+        return cars;
     }
 }

@@ -1,7 +1,6 @@
 package test.gai.service;
 
 import org.springframework.stereotype.Service;
-import test.gai.DTO.OwnerDto;
 import test.gai.exception.ResourceNotFoundException;
 import test.gai.entity.Owner;
 
@@ -12,17 +11,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import test.gai.mapper.MappingUtils;
 import test.gai.model.OwnerModel;
+import test.gai.repository.CarRepository;
 import test.gai.repository.OwnerRepository;
 
 @Service
 public class OwnerService {
 
     private final OwnerRepository ownerRepository;
+    private final CarRepository carRepository;
     private final MappingUtils mappingUtils;
 
     @Autowired
-    public OwnerService(OwnerRepository ownerRepository, MappingUtils mappingUtils) {
+    public OwnerService(OwnerRepository ownerRepository, CarRepository carRepository, MappingUtils mappingUtils) {
         this.ownerRepository = ownerRepository;
+        this.carRepository = carRepository;
         this.mappingUtils = mappingUtils;
     }
 
@@ -37,8 +39,14 @@ public class OwnerService {
 
     @Transactional(readOnly = true)
     public OwnerModel getOwnerById(Long id) {
-        return mappingUtils.mapToOwnerModelFromEntity(ownerRepository.findById(id)
-                .orElseThrow(() -> ThrowableMessage("Owner", id)));
+        OwnerModel ownerModel = mappingUtils
+                .mapToOwnerModelFromEntity(ownerRepository.findById(id)
+                        .orElseThrow(() -> ThrowableMessage("Owner", id)));
+        ownerModel.setCars(carRepository.findByOwnerId(id)
+                .stream()
+                .map(mappingUtils::mapToCarModelFromEntity)
+                .toList());
+        return ownerModel;
     }
 
 

@@ -1,6 +1,6 @@
 package test.gai.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +19,5 @@ public class Car {
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
-    @JsonBackReference // Указывает, что это "дочерняя" часть связи
     private Owner owner;
 }

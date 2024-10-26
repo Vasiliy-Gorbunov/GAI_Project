@@ -1,6 +1,5 @@
 package test.gai.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +21,5 @@ public class Owner {
     private String licenseCategories;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference // Указывает, что это "родитель" в двунаправленной связи
     private List<Car> cars;
 }

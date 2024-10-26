@@ -12,15 +12,19 @@ import java.util.Optional;
 public class OwnerJdbcRepository implements OwnerRepository{
 
     private final JdbcTemplate jdbcTemplate;
+    private final CarJdbcRepository carJdbcRepository;
 
-    public OwnerJdbcRepository(JdbcTemplate jdbcTemplate) {
+    public OwnerJdbcRepository(JdbcTemplate jdbcTemplate, CarJdbcRepository carJdbcRepository) {
         this.jdbcTemplate = jdbcTemplate;
+        this.carJdbcRepository = carJdbcRepository;
     }
 
     @Override
     public List<Owner> findAll() {
         String sql = "SELECT * FROM owner";
-        return jdbcTemplate.query(sql, new OwnerRowMapper());
+        List<Owner> owners = jdbcTemplate.query(sql, new OwnerRowMapper());
+        owners.forEach(owner -> owner.setCars(carJdbcRepository.findByOwnerId(owner.getId())));
+        return owners;
     }
 
     @Override
@@ -32,13 +36,16 @@ public class OwnerJdbcRepository implements OwnerRepository{
 
     @Override
     public Owner save(Owner owner) {
-        if (owner.getId() == null) {
+        if (owner.getId() == null || findById(owner.getId()).isEmpty()) {
             String sql = "INSERT INTO owner (name, dob, gender, license_categories) VALUES (?, ?, ?, ?)";
             jdbcTemplate.update(sql,
                     owner.getName(),
                     owner.getDob(),
                     owner.getGender().name(),
                     owner.getLicenseCategories());
+            String sqlSelect = "SELECT * FROM Owner ORDER BY id DESC LIMIT 1";
+            List<Owner> owners = jdbcTemplate.query(sqlSelect, new OwnerRowMapper());
+            return owners.stream().findFirst().get();
         } else {
             String sql = "UPDATE owner SET name = ?, dob = ?, gender = ?, license_categories = ? WHERE id = ?";
             jdbcTemplate.update(sql,
@@ -48,7 +55,7 @@ public class OwnerJdbcRepository implements OwnerRepository{
                     owner.getLicenseCategories(),
                     owner.getId());
         }
-        return owner;
+        return findById(owner.getId()).get();
     }
 
     @Override

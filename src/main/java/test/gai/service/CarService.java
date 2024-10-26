@@ -32,6 +32,16 @@ public class CarService {
 
     @Transactional(readOnly = true)
     public List<CarModel> getAllCars() {
+//        List<CarModel> carModels = carRepository.findAll().stream()
+//                .map(mappingUtils::mapToCarModelFromEntity).toList();
+//        carModels.forEach(carModel -> carModel.setOwner(mappingUtils.mapToOwnerModelFromEntity
+//                (carRepository.findById(carModel.getId()).get().getOwner())));
+//        carModels.forEach(carModel -> {
+//            if (carModel.getOwner() != null) {
+//                carModel.getOwner().setCars(null);
+//            }
+//        });
+//        return carModels;
         return carRepository.findAll().stream().map(mappingUtils::mapToCarModelFromEntity).collect(Collectors.toList());
     }
 
@@ -46,12 +56,11 @@ public class CarService {
     @Transactional
     public CarModel createCar(CarModel carModel) {
         Car car = mappingUtils.mapToCar(carModel);
-        if (car.getOwner() != null) {
+        if (carModel.getOwner() != null) {
             Optional<Owner> owner = ownerRepository.findById(car.getOwner().getId());
             if (owner.isEmpty()) {
-                throw ThrowableMessage("Car", car.getOwner().getId());
-            }
-            car.setOwner(owner.get());
+                ownerRepository.save(car.getOwner());
+            } else car.setOwner(owner.get());
         }
         return mappingUtils.mapToCarModelFromEntity(carRepository.save(car));
     }
@@ -92,7 +101,7 @@ public class CarService {
     public List<CarModel> getCarsByOwnerId(Long ownerId) {
         Owner owner = ownerRepository.findById(ownerId)
                 .orElseThrow(() -> ThrowableMessage("Owner", ownerId));
-        return carRepository.findByOwner(owner).stream()
+        return carRepository.findByOwnerId(ownerId).stream()
                 .map(mappingUtils::mapToCarModelFromEntity)
                 .collect(Collectors.toList());
     }

@@ -10,15 +10,12 @@ import java.util.Optional;
 @Repository
 public interface OwnerJpaRepository extends OwnerRepository, JpaRepository<Owner, Long> {
 
-    @Override
+
     List<Owner> findAll();
 
-    @Override
     Optional<Owner> findById(Long id);
 
-    @Override
     Owner save(Owner owner);
 
-    @Override
     void deleteById(Long id);
 }

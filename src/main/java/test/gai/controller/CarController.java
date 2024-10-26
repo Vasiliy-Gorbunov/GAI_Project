@@ -1,11 +1,13 @@
 package test.gai.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import test.gai.DTO.CarDto;
+import test.gai.DTO.OwnerDto;
 import test.gai.mapper.MappingUtils;
 import test.gai.model.CarModel;
 import test.gai.service.CarService;
@@ -27,11 +29,10 @@ public class CarController {
         this.mappingUtils = mappingUtils;
     }
 
+
     @GetMapping
     public List<CarDto> getAllCars() {
-        return carService.getAllCars().stream()
-                .map(mappingUtils::mapToCarDto)
-                .collect(Collectors.toList());
+        return carService.getAllCars().stream().map(mappingUtils::mapToCarDto).toList();
     }
 
     @GetMapping("/{id}")

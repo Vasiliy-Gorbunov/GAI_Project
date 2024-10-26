@@ -11,17 +11,13 @@ import java.util.Optional;
 @Repository
 public interface CarJpaRepository extends CarRepository, JpaRepository<Car, Long> {
 
-    @Override
     List<Car> findAll();
 
-    @Override
     Optional<Car> findById(Long id);
 
-    @Override
     Car save(Car car);
 
-    @Override
     void deleteById(Long id);
 
-    List<Car> findByOwner(Owner owner);
+    List<Car> findByOwnerId(Long id);
 }
